@@ -72,6 +72,14 @@ def start():
         #prompt them for the password
         #delete the data
         pass
+		
+		
+		
+"""
+		Decrypting the data isn't an option. JSON doesn't support the encrypted data type so the encoded messages can't be stored in the json file.
+
+
+
 
 def encrypt_data(data, master_pass):
     key = master_pass.encode('utf-8') #must be 16 bytes 
@@ -81,24 +89,24 @@ def encrypt_data(data, master_pass):
 
     if os.path.isfile("passwords.json"):
         try:
-            with open('passwords.json', 'r') as fp:
-                users = json.load(fp)
-            users["reddit.com"]["nonce"] = str(nonce)
-            with open('passwords.json', 'w') as fp:
-                json.dump(users, fp, sort_keys=True, indent=4)
+            with open('passwords.json', 'r') as jsondata:
+                jfile = json.load(jsondata)
+            jfile["reddit.com"]["nonce"] = str(nonce)
+            with open('passwords.json', 'w') as jsondata:
+                json.dump(jfile, jsondata, sort_keys=True, indent=4)
         except KeyError:
-            with open('passwords.json', 'r') as fp:
-                users = json.load(fp)
-            users["reddit.com"] = {}
-            users["reddit.com"]["nonce"] = str(nonce)
-            with open('passwords.json', 'w') as fp:
-                json.dump(users, fp, sort_keys=True, indent=4)
+            with open('passwords.json', 'r') as jsondata:
+                jfile = json.load(jsondata)
+            jfile["reddit.com"] = {}
+            jfile["reddit.com"]["nonce"] = str(nonce)
+            with open('passwords.json', 'w') as jsondata:
+                json.dump(jfile, jsondata, sort_keys=True, indent=4)
 
     else:
-        users = {"reddit.com": {}}
-        users["reddit.com"]["nonce"] = str(nonce)
-        with open('passwords.json', 'w') as fp:
-            json.dump(users, fp, sort_keys=True, indent=4)
+        jfile = {"reddit.com": {}}
+        jfile["reddit.com"]["nonce"] = str(nonce)
+        with open('passwords.json', 'w') as jsondata:
+            json.dump(jfile, jsondata, sort_keys=True, indent=4)
 
 
 
@@ -110,8 +118,8 @@ def decrypt_data(key, encrypted_data):
     if os.path.isfile('passwords.json'):
         try:
             with open('passwords.json', 'r') as jdata:
-                tagz = json.load(jdata)
-            nonce = tagz["reddit.com"]["nonce"].encode('utf-8')
+                jfile = json.load(jdata)
+            nonce = jfile["reddit.com"]["nonce"].encode('utf-8')
         except KeyError:
             pass
 
@@ -124,3 +132,5 @@ def decrypt_data(key, encrypted_data):
 encrypt_data('myRedditPassword', '1234567891234567')
 
 decrypt_data('1234567891234567', b'!:\xdc*\x9e\x00.\xb1\x89I\x0e\x8am+\x9a\xa1')
+
+"""
