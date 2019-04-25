@@ -76,7 +76,7 @@ def start():
 		
 		
 """
-		Decrypting the data isn't an option. JSON doesn't support the encrypted data type so the encoded messages can't be stored in the json file.
+		Encrypting the data isn't an option. JSON doesn't support the encrypted data type so the encoded messages can't be stored in the json file.
 
 
 
