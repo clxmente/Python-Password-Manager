@@ -45,10 +45,34 @@ def generate_password():
                 #save password to database
                 spinner = Halo(text="Saving", spinner=dots, color="green")
                 spinner.start()
+
+                if os.path.isfile("passwords.json"):
+                    try:
+                        with open('passwords.json', 'r') as jsondata:
+                            jfile = json.load(jsondata)
+                        jfile["reddit.com"]["password"] = finalPass
+                        with open('passwords.json', 'w') as jsondata:
+                            json.dump(jfile, jsondata, sort_keys=True, indent=4)
+                    except KeyError:
+                        with open('passwords.json', 'r') as jsondata:
+                            jfile = json.load(jsondata)
+                        jfile["reddit.com"] = {}
+                        jfile["reddit.com"]["password"] = finalPass
+                        with open('passwords.json', 'w') as jsondata:
+                            json.dump(jfile, jsondata, sort_keys=True, indent=4)
+
+                else:
+                    jfile = {"reddit.com": {}}
+                    jfile["reddit.com"]["password"] = finalPass
+                    with open('passwords.json', 'w') as jsondata:
+                        json.dump(jfile, jsondata, sort_keys=True, indent=4)
+
+
+
+
                 time.sleep(1)
                 spinner.stop()
                 print("Thank you!")
-                pass
             else:
                 spinner = Halo(text="Exiting", spinner=dots, color="red")
                 spinner.start()
@@ -73,6 +97,8 @@ def start():
         #delete the data
         pass
 		
+
+generate_password()
 		
 		
 """
