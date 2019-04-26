@@ -14,14 +14,14 @@ specialChar = "!@#$%^&*()-_"
 
 dots = {"interval": 80, "frames": ["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"]}
 
-def generate_password():
+def generate_password(website):
     password = []
 
     length = input("How many characters do you want your password to be? ")
   
     if int(length) < 8:
         print("It is recommended you have a password of at least 8 characters")
-        generate_password()
+        generate_password(website)
     
     else:
         for i in range(0, int(length)):
@@ -38,7 +38,7 @@ def generate_password():
         loop = input("Generate a new password? (Y/N) ")
 
         if loop.lower() == "y":
-            generate_password()
+            generate_password(website)
         else:
             savePass = input("Would you like to save the password? (Y/N) ")
             if savePass.lower() == 'y':
@@ -50,20 +50,20 @@ def generate_password():
                     try:
                         with open('passwords.json', 'r') as jsondata:
                             jfile = json.load(jsondata)
-                        jfile["reddit.com"]["password"] = finalPass
+                        jfile[website]["password"] = finalPass
                         with open('passwords.json', 'w') as jsondata:
                             json.dump(jfile, jsondata, sort_keys=True, indent=4)
                     except KeyError:
                         with open('passwords.json', 'r') as jsondata:
                             jfile = json.load(jsondata)
-                        jfile["reddit.com"] = {}
-                        jfile["reddit.com"]["password"] = finalPass
+                        jfile[website] = {}
+                        jfile[website]["password"] = finalPass
                         with open('passwords.json', 'w') as jsondata:
                             json.dump(jfile, jsondata, sort_keys=True, indent=4)
 
                 else:
-                    jfile = {"reddit.com": {}}
-                    jfile["reddit.com"]["password"] = finalPass
+                    jfile = {website: {}}
+                    jfile[website]["password"] = finalPass
                     with open('passwords.json', 'w') as jsondata:
                         json.dump(jfile, jsondata, sort_keys=True, indent=4)
 
@@ -79,6 +79,7 @@ def generate_password():
                 time.sleep(1)
                 spinner.stop()
                 print("Goodbye!")
+
 
 def start():
     print("1) Add/Update a password in the database")
@@ -98,7 +99,6 @@ def start():
         pass
 		
 
-generate_password()
 		
 		
 """
@@ -117,20 +117,20 @@ def encrypt_data(data, master_pass):
         try:
             with open('passwords.json', 'r') as jsondata:
                 jfile = json.load(jsondata)
-            jfile["reddit.com"]["nonce"] = str(nonce)
+            jfile[website]["nonce"] = str(nonce)
             with open('passwords.json', 'w') as jsondata:
                 json.dump(jfile, jsondata, sort_keys=True, indent=4)
         except KeyError:
             with open('passwords.json', 'r') as jsondata:
                 jfile = json.load(jsondata)
-            jfile["reddit.com"] = {}
-            jfile["reddit.com"]["nonce"] = str(nonce)
+            jfile[website] = {}
+            jfile[website]["nonce"] = str(nonce)
             with open('passwords.json', 'w') as jsondata:
                 json.dump(jfile, jsondata, sort_keys=True, indent=4)
 
     else:
-        jfile = {"reddit.com": {}}
-        jfile["reddit.com"]["nonce"] = str(nonce)
+        jfile = {website: {}}
+        jfile[website]["nonce"] = str(nonce)
         with open('passwords.json', 'w') as jsondata:
             json.dump(jfile, jsondata, sort_keys=True, indent=4)
 
@@ -145,7 +145,7 @@ def decrypt_data(key, encrypted_data):
         try:
             with open('passwords.json', 'r') as jdata:
                 jfile = json.load(jdata)
-            nonce = jfile["reddit.com"]["nonce"].encode('utf-8')
+            nonce = jfile[website]["nonce"].encode('utf-8')
         except KeyError:
             pass
 
