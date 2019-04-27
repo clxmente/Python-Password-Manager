@@ -27,6 +27,9 @@ def generate_password(website):
         print(colored("{} A password of at least 8 characters is required".format(x_mark), "red"))
         restart_program()
     
+    elif length.lower() == 'exit':
+        exit_program()
+    
     else:
         for i in range(0, int(length)):
             password.append(random.choice(random.choice([alphabetLower, alphabetUpper, digits, specialChar]))) 
@@ -38,12 +41,16 @@ def generate_password(website):
         time.sleep(1)
         spinner.stop()
 
-        print(finalPass)
+        print(colored(finalPass, "yellow"))
         loop = input("Generate a new password? (Y/N) ")
 
         if loop.lower() == "y":
             generate_password(website)
-        else:
+
+        elif loop.lower() == 'exit':
+            exit_program()
+
+        elif loop.lower() == 'n':
             savePass = input("Would you like to save the password? (Y/N) ")
             if savePass.lower() == 'y':
                 #save password to database
@@ -77,7 +84,7 @@ def generate_password(website):
                 time.sleep(1)
                 spinner.stop()
                 print(colored("{} Saved successfully. Thank you!".format(checkmark), "green"))
-            else:
+            elif savePass.lower() == 'n' or 'exit':
                 exit_program()
 
 def save_password(password, website):
@@ -110,6 +117,7 @@ def save_password(password, website):
 
 
 def start():
+    print(colored("\nENTER 'exit' AT ANY POINT TO EXIT\n", "magenta"))
     print(colored("1) Add/Update a password in the database", 'blue'))
     print(colored("2) Look up a stored password", 'blue'))
     print(colored("3) Exit program", 'blue' ))
@@ -129,8 +137,33 @@ def start():
 
                 save_password(password, website)
 
+                time.sleep(1)
+                loop = input("Would you like to return to the beginning? (Y/N) ")
+                if loop.lower() == 'y':
+                    time.sleep(1)
+                    restart_program()
+                elif loop.lower() == 'n' or 'exit':
+                    time.sleep(1)
+                    exit_program()
+                else:
+                    print(colored("Invalid option."))
+                    time.sleep(1)
+                    exit_program()
+
             elif gen_question.lower() == 'y':
                 generate_password(website)
+                time.sleep(1)
+                loop = input("Would you like to return to the beginning? (Y/N) ")
+                if loop.lower() == 'y':
+                    time.sleep(1)
+                    restart_program()
+                elif loop.lower() == 'n' or 'exit':
+                    time.sleep(1)
+                    exit_program()
+                else:
+                    print(colored("Invalid option."))
+                    time.sleep(1)
+                    exit_program()
 
             elif gen_question.lower() == 'exit':
                 exit_program()
@@ -142,9 +175,23 @@ def start():
 
 
         pass
-    elif beginProgram == "2":
-        #look up a stored password
-        pass
+    elif beginProgram == "2": #look up a stored password
+        website = input("Enter the website for the password you want to retrieve: ")
+
+        if website.lower() == 'exit':
+            exit_program()
+        
+        else:
+            #list of all the websites stored then asks
+            with open('passwords.json', 'r') as jsondata:
+                    jfile = json.load(jsondata)
+            user_password = jfile[website]["password"]
+
+
+            print(colored("Your password is: {}".format(user_password), "yellow"))
+            restart_program()
+
+
 
     elif beginProgram == "3":
         print(colored("Goodbye!", 'green'))
@@ -155,6 +202,9 @@ def start():
         #prompt them for the password
         #delete the data
         pass
+
+    elif beginProgram.lower() == 'exit':
+        exit_program()
     
     else:
         time.sleep(1)
