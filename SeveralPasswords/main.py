@@ -1,3 +1,10 @@
+"""
+
+pip install termcolor
+pip install halo
+
+"""
+
 import random
 import time
 import os
@@ -156,10 +163,9 @@ def start():
 
         pass
     elif beginProgram == "2": #look up a stored password
-        print(colored("Current Passwords Stored:", "yellow"))
-
         #Load the passwords stored with a bit of flair
         if os.path.isfile('passwords.json'): #but first we have to check if the file exists
+            print(colored("Current Passwords Stored:", "yellow"))
             with open("passwords.json", 'r') as jsondata:
                 pass_list=json.load(jsondata)
             spinner = Halo(text=colored("Loading Passwords", "yellow"), color="yellow", spinner=dots)
@@ -197,17 +203,23 @@ def start():
 
     elif beginProgram == "3":
         print(colored("Goodbye!", 'green'))
-        pass
 
     elif beginProgram == "4":
         #first ask the user if they are sure they want to delete the database
-        #delete the data
-        with open('passwords.json', 'r') as jsondata:
-            jfile = json.load(jsondata)
-        jfile = {}
-        with open('passwords.json', 'w') as jsondata:
-            json.dump(jfile, jsondata, sort_keys=True, indent=4)
-        pass
+        print(colored("{} ARE YOU SURE YOU WANT TO DELETE YOUR DATA {}".format(x_mark, x_mark), "red"))
+        choice = input("(Y/N) ")
+
+
+        if choice.lower() == "y": #delete the data
+            if os.path.isfile("passwords.json"):
+                with open('passwords.json', 'r') as jsondata:
+                    jfile = json.load(jsondata)
+                jfile = {}
+                with open('passwords.json', 'w') as jsondata:
+                    json.dump(jfile, jsondata, sort_keys=True, indent=4)
+            else:
+                print(colored("{} Password File Does Not Exist. Restart the program and go through option 1 to initialize.".format(x_mark), "red"))
+                restart_program()
 
     elif beginProgram.lower() == 'exit':
         exit_program()
@@ -241,14 +253,8 @@ def loop_program():
         print(colored("Invalid option.", "red"))
         exit_program()
 
-start()
+start() #here we go :)
 		
 
 		
 		
-"""
-
-pip install termcolor
-pip install halo
-
-"""
