@@ -138,32 +138,12 @@ def start():
                 save_password(password, website)
 
                 time.sleep(1)
-                loop = input("Would you like to return to the beginning? (Y/N) ")
-                if loop.lower() == 'y':
-                    time.sleep(1)
-                    restart_program()
-                elif loop.lower() == 'n' or 'exit':
-                    time.sleep(1)
-                    exit_program()
-                else:
-                    print(colored("Invalid option."))
-                    time.sleep(1)
-                    exit_program()
+                loop_program()
 
             elif gen_question.lower() == 'y':
                 generate_password(website)
                 time.sleep(1)
-                loop = input("Would you like to return to the beginning? (Y/N) ")
-                if loop.lower() == 'y':
-                    time.sleep(1)
-                    restart_program()
-                elif loop.lower() == 'n' or 'exit':
-                    time.sleep(1)
-                    exit_program()
-                else:
-                    print(colored("Invalid option."))
-                    time.sleep(1)
-                    exit_program()
+                loop_program()
 
             elif gen_question.lower() == 'exit':
                 exit_program()
@@ -181,6 +161,9 @@ def start():
         if website.lower() == 'exit':
             exit_program()
         
+        elif website == '':
+            print(colored("No website name given.", "red"))
+            restart_program()
         else:
             #list of all the websites stored then asks
             with open('passwords.json', 'r') as jsondata:
@@ -189,7 +172,7 @@ def start():
 
 
             print(colored("Your password is: {}".format(user_password), "yellow"))
-            restart_program()
+            loop_program()
 
 
 
@@ -224,6 +207,19 @@ def exit_program():
     time.sleep(1)
     spinner.stop()
     print(colored("Goodbye!", "green"))
+
+def loop_program():
+    option = input("Would you like to return to the beginning? (Y/N) ")
+    if option.lower() == 'y':
+        time.sleep(1)
+        restart_program()
+    elif option.lower() == 'n' or 'exit':
+        time.sleep(1)
+        exit_program()
+    else:
+        print(colored("Invalid option."))
+        time.sleep(1)
+        exit_program()
 
 start()
 		
