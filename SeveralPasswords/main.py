@@ -156,6 +156,20 @@ def start():
 
         pass
     elif beginProgram == "2": #look up a stored password
+        print(colored("Current Passwords Stored:", "yellow"))
+
+        #Load the passwords stored with a bit of flair
+        with open("passwords.json") as jsondata:
+            pass_list=json.load(jsondata)
+        spinner = Halo(text=colored("Loading Passwords", "yellow"), color="yellow", spinner=dots)
+        spinner.start()
+        time.sleep(2)
+        spinner.stop()
+        for i in pass_list:
+            print(colored("--{}".format(i), "yellow"))
+
+
+
         website = input("Enter the website for the password you want to retrieve: ")
 
         if website.lower() == 'exit':
@@ -165,7 +179,6 @@ def start():
             print(colored("No website name given.", "red"))
             restart_program()
         else:
-            #list of all the websites stored then asks
             with open('passwords.json', 'r') as jsondata:
                     jfile = json.load(jsondata)
             user_password = jfile[website]["password"]
@@ -211,14 +224,11 @@ def exit_program():
 def loop_program():
     option = input("Would you like to return to the beginning? (Y/N) ")
     if option.lower() == 'y':
-        time.sleep(1)
         restart_program()
     elif option.lower() == 'n' or 'exit':
-        time.sleep(1)
         exit_program()
     else:
-        print(colored("Invalid option."))
-        time.sleep(1)
+        print(colored("Invalid option.", "red"))
         exit_program()
 
 start()
