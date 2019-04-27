@@ -72,7 +72,7 @@ def generate_password(website):
                         with open('passwords.json', 'w') as jsondata:
                             json.dump(jfile, jsondata, sort_keys=True, indent=4)
 
-                else:
+                else: #initialize the file in case it doesn't exist off the start.
                     jfile = {website: {}}
                     jfile[website]["password"] = finalPass
                     with open('passwords.json', 'w') as jsondata:
@@ -103,7 +103,7 @@ def save_password(password, website):
             with open('passwords.json', 'w') as jsondata:
                 json.dump(jfile, jsondata, sort_keys=True, indent=4)
 
-    else:
+    else: #initialize the file in case it doesn't exist off the start.
         jfile = {website: {}}
         jfile[website]["password"] = password
         with open('passwords.json', 'w') as jsondata:
@@ -159,33 +159,39 @@ def start():
         print(colored("Current Passwords Stored:", "yellow"))
 
         #Load the passwords stored with a bit of flair
-        with open("passwords.json") as jsondata:
-            pass_list=json.load(jsondata)
-        spinner = Halo(text=colored("Loading Passwords", "yellow"), color="yellow", spinner=dots)
-        spinner.start()
-        time.sleep(2)
-        spinner.stop()
-        for i in pass_list:
-            print(colored("--{}".format(i), "yellow"))
+        if os.path.isfile('passwords.json'): #but first we have to check if the file exists
+            with open("passwords.json", 'r') as jsondata:
+                pass_list=json.load(jsondata)
+            spinner = Halo(text=colored("Loading Passwords", "yellow"), color="yellow", spinner=dots)
+            spinner.start()
+            time.sleep(2)
+            spinner.stop()
+            for i in pass_list:
+                print(colored("--{}".format(i), "yellow"))
 
+            website = input("Enter the website for the password you want to retrieve: ")
 
+            if website.lower() == 'exit':
+                exit_program()
+            
+            elif website == '':
+                print(colored("No website name given.", "red"))
+                restart_program()
+            else:
+                try:
+                    with open('passwords.json', 'r') as jsondata:
+                            jfile = json.load(jsondata)
+                    user_password = jfile[website]["password"]
 
-        website = input("Enter the website for the password you want to retrieve: ")
-
-        if website.lower() == 'exit':
-            exit_program()
-        
-        elif website == '':
-            print(colored("No website name given.", "red"))
-            restart_program()
+                    print(colored("Your password is: {}".format(user_password), "yellow"))
+                    loop_program()
+                except KeyError:
+                    print(colored("{} Password not found for {} . Create a password for it or enter a new name.".format(x_mark, website), "red"))
+                    restart_program()
         else:
-            with open('passwords.json', 'r') as jsondata:
-                    jfile = json.load(jsondata)
-            user_password = jfile[website]["password"]
+            print(colored("{} Password File Does Not Exist. Restart the program and go through option 1 to initialize.".format(x_mark), "red"))
+            restart_program()
 
-
-            print(colored("Your password is: {}".format(user_password), "yellow"))
-            loop_program()
 
 
 
@@ -195,8 +201,12 @@ def start():
 
     elif beginProgram == "4":
         #first ask the user if they are sure they want to delete the database
-        #prompt them for the password
         #delete the data
+        with open('passwords.json', 'r') as jsondata:
+            jfile = json.load(jsondata)
+        jfile = {}
+        with open('passwords.json', 'w') as jsondata:
+            json.dump(jfile, jsondata, sort_keys=True, indent=4)
         pass
 
     elif beginProgram.lower() == 'exit':
