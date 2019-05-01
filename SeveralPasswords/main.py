@@ -183,8 +183,6 @@ def start():
                         print(colored('{} Enter Y or N.'.format(x_mark), 'red'))
                         restart_program()
 
-
-                pass
             elif beginProgram == "2": #look up a stored password
                 #Load the passwords stored with a bit of flair
                 if os.path.isfile('passwords.json'): #but first we have to check if the file exists
@@ -224,20 +222,25 @@ def start():
 
 
                 if choice.lower() == "y": #delete the data
-                    if os.path.isfile("passwords.json"):
-                        spinner = Halo(text=colored("Deleting all password data.", "red"), color="red", spinner=dots)
-                        spinner.start()
-                        time.sleep(1)
-                        spinner.stop()
-                        with open('passwords.json', 'r') as jsondata:
-                            jfile = json.load(jsondata)
-                        jfile = {}
-                        with open('passwords.json', 'w') as jsondata:
-                            json.dump(jfile, jsondata, sort_keys=True, indent=4)
-                        print(colored("{} Password data deleted successfully.".format(checkmark), "green"))
+                    del_password = input("Enter your MASTER password to delete your data: ")
+                    if sha256(del_password.encode('utf-8')).hexdigest() == verify_pass:
+                        if os.path.isfile("passwords.json"):
+                            spinner = Halo(text=colored("Deleting all password data.", "red"), color="red", spinner=dots)
+                            spinner.start()
+                            time.sleep(1)
+                            spinner.stop()
+                            with open('passwords.json', 'r') as jsondata:
+                                jfile = json.load(jsondata)
+                            jfile = {}
+                            with open('passwords.json', 'w') as jsondata:
+                                json.dump(jfile, jsondata, sort_keys=True, indent=4)
+                            print(colored("{} Password data deleted successfully.".format(checkmark), "green"))
+                        else:
+                            print(colored("{} Password File Does Not Exist. Restart the program and go through option 1 to initialize.".format(x_mark), "red"))
+                            restart_program()
                     else:
-                        print(colored("{} Password File Does Not Exist. Restart the program and go through option 1 to initialize.".format(x_mark), "red"))
-                        restart_program()
+                        print(colored("{} Incorrect Password {}".format(x_mark, x_mark), "red"))
+                        exit_program()
 
             elif beginProgram.lower() == 'exit':
                 exit_program()
