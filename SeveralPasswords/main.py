@@ -2,6 +2,7 @@
 
 pip install termcolor
 pip install halo
+pip install pycryptodome
 
 """
 
@@ -13,6 +14,7 @@ import json
 from halo import Halo
 from os.path import isfile
 from termcolor import colored
+from Crypto.Cipher import AES
 
 
 alphabetLower = "abcdefghijklmnopqrstuvwxyz"
@@ -24,6 +26,60 @@ checkmark = "\u2713"
 x_mark = "\u2717"
 
 dots = {"interval": 80, "frames": ["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"]}
+
+def encrypt_data(data, master_pass, website):
+    final_master = master_pass + '================' #concatenated extra characters in the case that the password is less than 16 characters
+    key = final_master[:16].encode('utf-8') #must be 16 bytes 
+
+    cipher = AES.new(key, AES.MODE_EAX)
+    the_nonce = cipher.nonce #A value that must never be reused for any other encryption done with this key (save alongside encrypted password?)
+    nonce = the_nonce.decode(encoding='latin-1', errors="strict") #encoded in order to be able to write it to the json file. 
+
+    data_to_encrypt = data.encode('utf-8') #password that would be encrypted where *data* is the password
+    ciphertext = cipher.encrypt(data_to_encrypt)
+    ciphertext_decoded = ciphertext.decode(encoding='latin-1', errors="strict")
+    if os.path.isfile("passwords.json"):
+        try:
+            with open('passwords.json', 'r') as jsondata:
+                jfile = json.load(jsondata)
+            jfile[website]["nonce"] = str(nonce)
+            jfile[website]["data"] = str(ciphertext_decoded)
+            with open('passwords.json', 'w') as jsondata:
+                json.dump(jfile, jsondata, sort_keys=True, indent=4)
+        except KeyError:
+            with open('passwords.json', 'r') as jsondata:
+                jfile = json.load(jsondata)
+            jfile[website] = {}
+            jfile[website]["nonce"] = str(nonce)
+            jfile[website]["data"] = str(ciphertext_decoded)
+            with open('passwords.json', 'w') as jsondata:
+                json.dump(jfile, jsondata, sort_keys=True, indent=4)
+
+    else:
+        jfile = {website: {}}
+        jfile[website]["nonce"] = str(nonce)
+        jfile[website]["data"] = str(ciphertext_decoded)
+        with open('passwords.json', 'w') as jsondata:
+            json.dump(jfile, jsondata, sort_keys=True, indent=4)
+
+def decrypt_data(key, website):
+
+    if os.path.isfile('passwords.json'):
+        try:
+            with open('passwords.json', 'r') as jdata:
+                jfile = json.load(jdata)
+            nonce = jfile[website]["nonce"].encode('latin-1')
+            data = jfile[website]["data"].encode('latin-1')
+        except KeyError:
+            pass
+
+
+    formatted_key = key + '================'
+    key_encoded = formatted_key[:16].encode('utf-8')
+    cipher = AES.new(key_encoded, AES.MODE_EAX, nonce=nonce)
+    plaintext = cipher.decrypt(data)
+    str_plaintext = plaintext.decode('utf-8')
+    print(str_plaintext)
 
 def generate_password(website):
     password = []
@@ -207,16 +263,21 @@ def start():
     elif beginProgram == "4":
         #first ask the user if they are sure they want to delete the database
         print(colored("{} ARE YOU SURE YOU WANT TO DELETE YOUR DATA {}".format(x_mark, x_mark), "red"))
-        choice = input("(Y/N) ")
+        choice = input("(Y/N): ")
 
 
         if choice.lower() == "y": #delete the data
             if os.path.isfile("passwords.json"):
+                spinner = Halo(text=colored("Deleting all password data.", "red"), color="red", spinner=dots)
+                spinner.start()
+                time.sleep(1)
+                spinner.stop()
                 with open('passwords.json', 'r') as jsondata:
                     jfile = json.load(jsondata)
                 jfile = {}
                 with open('passwords.json', 'w') as jsondata:
                     json.dump(jfile, jsondata, sort_keys=True, indent=4)
+                print(colored("{} Password data deleted successfully.".format(checkmark), "green"))
             else:
                 print(colored("{} Password File Does Not Exist. Restart the program and go through option 1 to initialize.".format(x_mark), "red"))
                 restart_program()
@@ -253,8 +314,9 @@ def loop_program():
         print(colored("Invalid option.", "red"))
         exit_program()
 
-start()  #here we go :)
 		
 
+
 		
+start() #here we go :)
 		
