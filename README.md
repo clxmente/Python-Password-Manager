@@ -1,6 +1,10 @@
 # Python Password Manager
 >Note: This password manager was made as a project and is NOT intended for actual use. Please use more sophisticated and well-tested/trusted password managers to store sensitive data.
 
+## Demo
+
+[![asciicast](https://asciinema.org/a/KQYYbYLHbihDYAeb2goIlCQeH.svg)](https://asciinema.org/a/KQYYbYLHbihDYAeb2goIlCQeH)
+
 ## AES Encryption
 
 The encryption method used in this program comes from the python library [PyCryptoDome](https://pypi.org/project/pycryptodome/). This program uses AES encryption methods to store sensitive data (in this case passwords) into a json file.
