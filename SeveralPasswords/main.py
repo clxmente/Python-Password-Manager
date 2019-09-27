@@ -30,11 +30,11 @@ dots = {"interval": 80, "frames": ["⠋","⠙","⠹","⠸","⠼","⠴","⠦","�
 
 def encrypt_data(data, master_pass, website):
     final_master = master_pass + '================' #concatenated extra characters in the case that the password is less than 16 characters
-    key = final_master[:16].encode('utf-8') #must be 16 bytes 
+    key = final_master[:16].encode('utf-8') #must be 16 bytes
 
     cipher = AES.new(key, AES.MODE_EAX)
     the_nonce = cipher.nonce #A value that must never be reused for any other encryption done with this key (save alongside encrypted password?)
-    nonce = the_nonce.decode(encoding='latin-1', errors="strict") #encoded in order to be able to write it to the json file. 
+    nonce = the_nonce.decode(encoding='latin-1', errors="strict") #encoded in order to be able to write it to the json file.
 
     data_to_encrypt = data.encode('utf-8') #password that would be encrypted where *data* is the password
     ciphertext = cipher.encrypt(data_to_encrypt)
@@ -95,18 +95,18 @@ def generate_password(website, master_password):
     password = []
 
     length = input("How many characters do you want your password to be? (At least 8) ")
-  
+
     if int(length) < 8:
         print(colored("{} A password of at least 8 characters is required".format(x_mark), "red"))
         restart_program()
-    
+
     elif length.lower() == 'exit':
         exit_program()
-    
+
     else:
         for i in range(0, int(length)):
-            password.append(random.choice(random.choice([alphabetLower, alphabetUpper, digits, specialChar]))) 
-    
+            password.append(random.choice(random.choice([alphabetLower, alphabetUpper, digits, specialChar])))
+
         finalPass = "".join(password)
 
         spinner = Halo(text=colored("Generating Password", "green"), spinner=dots, color="green")
@@ -200,7 +200,7 @@ def start():
 
                     if website.lower() == 'exit':
                         exit_program()
-                    
+
                     elif website == '':
                         print(colored("No website name given.", "red"))
                         restart_program()
@@ -227,13 +227,9 @@ def start():
                         if os.path.isfile("passwords.json"):
                             spinner = Halo(text=colored("Deleting all password data.", "red"), color="red", spinner=dots)
                             spinner.start()
-                            time.sleep(1)
+                            os.remove("passwords.json")
+                            os.remove("masterpassword.json")
                             spinner.stop()
-                            with open('passwords.json', 'r') as jsondata:
-                                jfile = json.load(jsondata)
-                            jfile = {}
-                            with open('passwords.json', 'w') as jsondata:
-                                json.dump(jfile, jsondata, sort_keys=True, indent=4)
                             print(colored("{} Password data deleted successfully.".format(checkmark), "green"))
                         else:
                             print(colored("{} Password File Does Not Exist. Restart the program and go through option 1 to initialize.".format(x_mark), "red"))
@@ -244,7 +240,7 @@ def start():
 
             elif beginProgram.lower() == 'exit':
                 exit_program()
-            
+
             else:
                 time.sleep(1)
                 print(colored('{} Enter one of the choices'.format(x_mark), 'red'))
@@ -263,8 +259,8 @@ def start():
             json.dump(jfile, jsondata, sort_keys=True, indent=4)
 
         print(colored("Thank you! Restart the program and enter your master password to begin.", "green"))
-        
-        
+
+
 
 
 def restart_program():
@@ -291,9 +287,8 @@ def loop_program():
         print(colored("Invalid option.", "red"))
         exit_program()
 
-		
 
 
-		
+
+
 start() #here we go :)
-		
