@@ -38,8 +38,11 @@ def encrypt_data(data, master_pass, website):
 
     data_to_encrypt = data.encode('utf-8') #password that would be encrypted where *data* is the password
     ciphertext = cipher.encrypt(data_to_encrypt)
-    ciphertext_decoded = ciphertext.decode(encoding='latin-1', errors="strict")
-
+    ciphertext_decoded = ciphertext.decode(encoding='latin-1', errors="strict") # if i don't do this, the data won't save to the json file. the data type isn't supported.
+    
+    spinner = Halo(text=colored("Saving", "green"), spinner=dots, color="green")
+    spinner.start()
+    # saving data to json file.
     if os.path.isfile("passwords.json"):
         try:
             with open('passwords.json', 'r') as jsondata:
@@ -63,9 +66,7 @@ def encrypt_data(data, master_pass, website):
         jfile[website]["password"] = str(ciphertext_decoded)
         with open('passwords.json', 'w') as jsondata:
             json.dump(jfile, jsondata, sort_keys=True, indent=4)
-
-    spinner = Halo(text=colored("Saving", "green"), spinner=dots, color="green")
-    spinner.start()
+            
     time.sleep(1)
     spinner.stop()
     print(colored("{} Saved successfully. Thank you!".format(checkmark), "green"))
@@ -82,7 +83,7 @@ def decrypt_data(key, website):
             print(colored("{} Password not found for {} . Create a password for it or enter a new name.".format(x_mark, website), "red"))
             restart_program()
 
-
+    #add the extra characters and then take the first 16 to make sure the key is right.
     formatted_key = key + '================'
     key_encoded = formatted_key[:16].encode('utf-8')
     cipher = AES.new(key_encoded, AES.MODE_EAX, nonce=nonce)
@@ -104,13 +105,15 @@ def generate_password(website, master_password):
         exit_program()
 
     else:
+        # generate a complex password.
+        spinner = Halo(text=colored("Generating Password", "green"), spinner=dots, color="green")
+        spinner.start()
         for i in range(0, int(length)):
+            #choose a character from one of the lists of characteers for the password randomly
             password.append(random.choice(random.choice([alphabetLower, alphabetUpper, digits, specialChar])))
 
         finalPass = "".join(password)
-
-        spinner = Halo(text=colored("Generating Password", "green"), spinner=dots, color="green")
-        spinner.start()
+        
         time.sleep(1)
         spinner.stop()
 
@@ -137,10 +140,11 @@ def start():
         with open("masterpassword.json", "r") as jsondata:
             jfile = json.load(jsondata)
 
-        verify_pass = jfile["Master"]
+        verify_pass = jfile["Master"] # load the saved hash of the master password
 
         master_password = input("Enter your MASTER password: ")
-
+   
+        #compare the hash of the inputted password to the saved password. They should match for it to be correct.
         if sha256(master_password.encode('utf-8')).hexdigest() == verify_pass:
             spinner = Halo(colored("Unlocking", "green"), color="green", spinner=dots)
             spinner.start()
