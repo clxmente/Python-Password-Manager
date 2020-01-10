@@ -1,34 +1,24 @@
-from Crypto.Cipher import AES
-from halo import Halo
-
 import json
 import string
 import os
+import random
 
-class PasswordNotFound(Exception):
-    pass
+from Crypto.Cipher import AES
+from modules.exceptions import *
+from halo import Halo
+from termcolor import colored
 
-class PasswordNotLongEnough(Exception):
-    pass
 
-class UserExits(Exception):
-    pass
-
-class PasswordFileDoesNotExist(Exception):
-    pass
-
-class EmptyField(Exception):
-    pass
 
 class DataManip:
     def __init__(self):
-        self.dots = {"interval": 80, "frames": ["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"]}
-        self.checkmark = "\u2713"
-        self.x_mark = "\u2717"
-        self.specialChar = "!@#$%^&*()-_"
+        self.dots_ = {"interval": 80, "frames": ["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"]}
+        self.checkmark_ = "\u2713"
+        self.x_mark_ = "\u2717"
+        self.specialChar_ = "!@#$%^&*()-_"
 
     def save_password(self, filename, data, nonce, website):
-        spinner = Halo(text=colored("Saving", "green"), spinner=self.dots, color="green")
+        spinner = Halo(text=colored("Saving", "green"), spinner=self.dots_, color="green")
         spinner.start()
         if os.path.isfile(filename):
             try:
@@ -53,7 +43,7 @@ class DataManip:
             with open(filename, 'w') as jsondata:
                 json.dump(jfile, jsondata, sort_keys=True, indent=4)
         spinner.stop()
-        print(colorted("{} Saved successfully. Thank you!".format(self.checkmark)))
+        print(colored("{} Saved successfully. Thank you!".format(self.checkmark_)))
 
 
 
@@ -77,7 +67,7 @@ class DataManip:
         # again, bytes is invalid data for JSON so we convert it
         encrypted_data = cipher.encrypt(data_to_encrypt).hex()
 
-        self.save_password(filename, encrypt_data, nonce, website)
+        self.save_password(filename, encrypted_data, nonce, website)
 
     def decrypt_data(self, master_pass, website, filename):
         if os.path.isfile(filename):
@@ -98,21 +88,25 @@ class DataManip:
 
         return plaintext_password
 
-    def generate_password(self, website, master_pass):
+    def generate_password(self):
+        """Going to have to rewrite this a bit when adding GUI because of
+        spinner."""
         password = []
         length = input("Enter Length for Password (At least 8): ")
 
-        if int(length) < 8:
-            raise PasswordNotLongEnough
-        elif length.lower() == "exit":
+        if length.lower() == "exit":
             raise UserExits
+        elif length == "":
+            raise EmptyField
+        elif int(length) < 8:
+            raise PasswordNotLongEnough
         else:
             # generating a password
-            spinner = Halo(text=colored("Generating Password", "green"), spinner=self.dots, color="green")
+            spinner = Halo(text=colored("Generating Password", "green"), spinner=self.dots_, color="green")
             spinner.start()
             for i in range(0, int(length)):
                 #choose character from one of the lists randomly
-                password.append(random.choice(random.choice([string.ascii_lowercase, string.ascii_uppercase, string.digits, self.specialChar])))
+                password.append(random.choice(random.choice([string.ascii_lowercase, string.ascii_uppercase, string.digits, self.specialChar_])))
 
             finalPass = "".join(password)
             spinner.stop()
@@ -122,7 +116,7 @@ class DataManip:
     def load_passwords(self, filename, master_pass):
         if os.path.isfile(filename):
             print(colored("Current Passwords Stored:", "yellow"))
-            spinner = Halo(text=colored("Loading Passwords", "yellow"), color="yellow", spinner=self.dots)
+            spinner = Halo(text=colored("Loading Passwords", "yellow"), color="yellow", spinner=self.dots_)
             # loading a list of website names in DB
             with open(filename, 'r') as jsondata:
                 pass_list = json.load(jsondata)
