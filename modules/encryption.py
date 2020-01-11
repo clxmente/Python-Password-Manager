@@ -18,7 +18,16 @@ class DataManip:
         self.x_mark_ = "\u2717"
         self.specialChar_ = "!@#$%^&*()-_"
 
-    def save_password(self, filename, data, nonce, website):
+    def __save_password(self, filename, data, nonce, website):
+        """Saves password to DB
+        
+        Arguments:
+            filename {str} -- DB to save to
+            data {str} -- password that will be saved
+            nonce {hexadecimal} -- converted from byte type to hexadecimal as byte type is not supported in JSON
+            website {str} -- name of the website for the given password
+        """               
+
         spinner = Halo(text=colored("Saving", "green"), spinner=self.dots_, color="green")
         spinner.start()
         if os.path.isfile(filename):
@@ -49,6 +58,14 @@ class DataManip:
 
 
     def encrypt_data(self, filename, data, master_pass, website):
+        """Encrypt and save the data to a file using master password as the key
+        
+        Arguments:
+            filename {str}
+            data {str} -- password to save
+            master_pass {str}
+            website {str} -- website to store password
+        """        
 
         """Concatenated extra characters in the case that the master password
         is less than 16 characters. However, this isn't a big safety trade off
@@ -68,12 +85,27 @@ class DataManip:
         # again, bytes is invalid data for JSON so we convert it
         encrypted_data = cipher.encrypt(data_to_encrypt).hex()
 
-        self.save_password(filename, encrypted_data, nonce, website)
+        self.__save_password(filename, encrypted_data, nonce, website)
 
     def decrypt_data(self, master_pass, website, filename):
+        """Return a decrypted password as a string.
+        
+        Arguments:
+            master_pass {str} -- key
+            website {str} -- The password being returned is from this website
+            filename {str} -- database in which the password is stored.
+        
+        Raises:
+            PasswordNotFound: Password is not located in DB
+            PasswordFileDoesNotExist: The db is not initiated
+        
+        Returns:
+            str -- decrypted password
+        """    
+
         if os.path.isfile(filename):
             try:
-                with open("passwords.json", 'r') as jdata:
+                with open(filename, 'r') as jdata:
                     jfile = json.load(jdata)
                 nonce = bytes.fromhex(jfile[website]["nonce"])
                 password = bytes.fromhex(jfile[website]["password"])
@@ -90,8 +122,18 @@ class DataManip:
         return plaintext_password
 
     def generate_password(self):
-        """Going to have to rewrite this a bit when adding GUI because of
-        spinner."""
+        """Generates a complex password
+        
+        Raises:
+            UserExits: user types "exit" in length
+            EmptyField: user leaves length field empty
+            PasswordNotLongEnough: raised when user enters a length below 8
+        
+        Returns:
+            str -- complex password
+        """        
+
+        # needs rewrite to get rid of spinner for GUI.
         password = []
         length = input("Enter Length for Password (At least 8): ")
 
@@ -113,23 +155,32 @@ class DataManip:
             spinner.stop()
 
             return finalPass
-
-    def load_passwords(self, filename, master_pass):
+    
+    def list_passwords(self, filename):
+        """Loads a list of websites in DB
+        
+        Arguments:
+            filename {str} -- DB file
+        
+        Raises:
+            PasswordFileIsEmpty: No Passwords stored in DB
+            PasswordFileDoesNotExist: Password File Not found
+        
+        Returns:
+            str -- List of Passwords
+        """
+        
         if os.path.isfile(filename):
-            print(colored("Current Passwords Stored:", "yellow"))
-            spinner = Halo(text=colored("Loading Passwords", "yellow"), color="yellow", spinner=self.dots_)
-            # loading a list of website names in DB
             with open(filename, 'r') as jsondata:
                 pass_list = json.load(jsondata)
-            spinner.stop()
+            
+            passwords_lst = ""
             for i in pass_list:
-                print(colored("--{}". format(i), "yellow"))
-
-            website = input("Enter website for the password you want to retrieve: ")
-
-            if website.lower() == "exit":
-                raise UserExits
-            elif website == "":
-                raise EmptyField
+                passwords_lst += "--{}\n".format(i)
+            
+            if passwords_lst == "":
+                raise PasswordFileIsEmpty
             else:
-                return self.decrypt_data(master_pass, website, filename)
+                return passwords_lst
+        else:
+            raise PasswordFileDoesNotExist

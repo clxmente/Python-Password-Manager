@@ -8,7 +8,7 @@ from termcolor import colored
 from halo import Halo
 
 from modules.encryption import DataManip
-from modules.exceptions import *
+from modules.exceptions import UserExits, PasswordFileDoesNotExist
 from modules.menu import Manager
 
 def exit_program():
@@ -27,21 +27,30 @@ def start(obj: DataManip):
         # compare the two hashes of inputted password and stored
         spinner = Halo(text=colored("Unlocking", "green"), color="green", spinner=obj.dots_)
         if sha256(master_password.encode("utf-8")).hexdigest() == stored_master_pass:
-
+            # create instance of Manager class
             menu = Manager(obj, "db/passwords.json", master_password)
 
-            print(colored("\n Enter 'exit' at any point to exit.\n", "magenta"))
-            print(colored("1) Add/Update a password", "blue"))
-            print(colored("2) Look up a stored password", "blue"))
-            print(colored("3) Exit program", "blue"))
-            print(colored("4) Erase all passwords", "red"))
-            choice = input("Enter a choice: ")
+            try:
+                # TODO: test and try to break
+                choice = menu.menu_prompt()
+            except UserExits:
+                exit_program()
 
             if choice == "1": # add or update a password
                 try:
                     menu.update_db()
                 except UserExits:
                     exit_program()
+            elif choice == "2": # look up a stored password
+                try:
+                    password = menu.load_password()
+                    print(colored(password, "yellow"))
+                except UserExits:
+                    exit_program()
+                except PasswordFileDoesNotExist:
+                    print(colored("DB is empty, please create a password first", "red"))
+                    exit_program()
+
 
     else: # First time running program: create a master password
         os.mkdir("db/")

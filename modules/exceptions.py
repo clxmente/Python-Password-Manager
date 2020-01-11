@@ -12,3 +12,6 @@ class PasswordFileDoesNotExist(Exception):
 
 class EmptyField(Exception):
     pass
+
+class PasswordFileIsEmpty(Exception):
+    pass
