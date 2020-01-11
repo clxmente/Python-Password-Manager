@@ -4,9 +4,10 @@ import os
 import random
 
 from Crypto.Cipher import AES
-from modules.exceptions import *
 from halo import Halo
 from termcolor import colored
+
+from modules.exceptions import *
 
 
 
