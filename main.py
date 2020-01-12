@@ -21,7 +21,6 @@ def start(obj: DataManip):
             jfile = json.load(jsondata)
 
         stored_master_pass = jfile["Master"] # load the saved hashed password
-
         master_password = input("Enter your Master Password: ")
 
         # compare the two hashes of inputted password and stored
@@ -31,26 +30,14 @@ def start(obj: DataManip):
             menu = Manager(obj, "db/passwords.json", master_password)
 
             try:
-                # TODO: test and try to break
-                choice = menu.menu_prompt()
+                menu.begin()
             except UserExits:
                 exit_program()
-
-            if choice == "1": # add or update a password
-                try:
-                    menu.update_db()
-                except UserExits:
-                    exit_program()
-            elif choice == "2": # look up a stored password
-                try:
-                    password = menu.load_password()
-                    print(colored(password, "yellow"))
-                except UserExits:
-                    exit_program()
-                except PasswordFileDoesNotExist:
-                    print(colored("DB is empty, please create a password first", "red"))
-                    exit_program()
-
+            except PasswordFileDoesNotExist:
+                print(colored(f"{obj.x_mark_} DB not found. Try adding a password {obj.x_mark_}", "red"))
+        else:
+            print(colored(f"{obj.x_mark_} Master password is incorrect {obj.x_mark_}", "red"))
+            return start(obj)
 
     else: # First time running program: create a master password
         os.mkdir("db/")

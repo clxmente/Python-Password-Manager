@@ -15,3 +15,6 @@ class EmptyField(Exception):
 
 class PasswordFileIsEmpty(Exception):
     pass
+
+class MasterPasswordIncorrect(Exception):
+    pass

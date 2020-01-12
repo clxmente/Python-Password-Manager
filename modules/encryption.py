@@ -9,8 +9,6 @@ from termcolor import colored
 
 from modules.exceptions import *
 
-
-
 class DataManip:
     def __init__(self):
         self.dots_ = {"interval": 80, "frames": ["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"]}
@@ -22,10 +20,10 @@ class DataManip:
         """Saves password to DB
         
         Arguments:
-            filename {str} -- DB to save to
-            data {str} -- password that will be saved
-            nonce {hexadecimal} -- converted from byte type to hexadecimal as byte type is not supported in JSON
-            website {str} -- name of the website for the given password
+        \tfilename {str} -- DB to save to
+        \tdata {str} -- password that will be saved
+        \tnonce {hexadecimal} -- converted from byte type to hexadecimal as byte type is not supported in JSON
+        \twebsite {str} -- name of the website for the given password
         """               
 
         spinner = Halo(text=colored("Saving", "green"), spinner=self.dots_, color="green")
@@ -61,10 +59,10 @@ class DataManip:
         """Encrypt and save the data to a file using master password as the key
         
         Arguments:
-            filename {str}
-            data {str} -- password to save
-            master_pass {str}
-            website {str} -- website to store password
+        \tfilename {str}
+        \tdata {str} -- password to save
+        \tmaster_pass {str}
+        \twebsite {str} -- website to store password
         """        
 
         """Concatenated extra characters in the case that the master password
@@ -91,16 +89,16 @@ class DataManip:
         """Return a decrypted password as a string.
         
         Arguments:
-            master_pass {str} -- key
-            website {str} -- The password being returned is from this website
-            filename {str} -- database in which the password is stored.
+        \tmaster_pass {str} -- key
+        \twebsite {str} -- The password being returned is from this website
+        \tfilename {str} -- database in which the password is stored.
         
         Raises:
-            PasswordNotFound: Password is not located in DB
-            PasswordFileDoesNotExist: The db is not initiated
+        \tPasswordNotFound: Password is not located in DB
+        \tPasswordFileDoesNotExist: The db is not initiated
         
         Returns:
-            str -- decrypted password
+        \tstr -- decrypted password
         """    
 
         if os.path.isfile(filename):
@@ -125,21 +123,20 @@ class DataManip:
         """Generates a complex password
         
         Raises:
-            UserExits: user types "exit" in length
-            EmptyField: user leaves length field empty
-            PasswordNotLongEnough: raised when user enters a length below 8
+        \tUserExits: user types "exit" in length
+        \tEmptyField: user leaves length field empty
+        \tPasswordNotLongEnough: raised when user enters a length below 8
         
         Returns:
-            str -- complex password
+        \tstr -- complex password
         """        
 
-        # needs rewrite to get rid of spinner for GUI.
         password = []
         length = input("Enter Length for Password (At least 8): ")
 
-        if length.lower() == "exit":
+        if length.lower().strip() == "exit":
             raise UserExits
-        elif length == "":
+        elif length.strip() == "":
             raise EmptyField
         elif int(length) < 8:
             raise PasswordNotLongEnough
@@ -160,16 +157,16 @@ class DataManip:
         """Loads a list of websites in DB
         
         Arguments:
-            filename {str} -- DB file
+        \tfilename {str} -- DB file
         
         Raises:
-            PasswordFileIsEmpty: No Passwords stored in DB
-            PasswordFileDoesNotExist: Password File Not found
+        \tPasswordFileIsEmpty: No Passwords stored in DB
+        \tPasswordFileDoesNotExist: Password File Not found
         
         Returns:
-            str -- List of Passwords
+        \tstr -- List of Passwords
         """
-        
+
         if os.path.isfile(filename):
             with open(filename, 'r') as jsondata:
                 pass_list = json.load(jsondata)
@@ -182,5 +179,32 @@ class DataManip:
                 raise PasswordFileIsEmpty
             else:
                 return passwords_lst
+        else:
+            raise PasswordFileDoesNotExist
+
+    def delete_db(self, filename, stored_master, entered_master):
+        """Delete DB/Password file & contents
+        
+        Arguments:
+            filename {str} -- DB/File to delete
+            stored_master {str} -- Stored master password in DB
+            entered_master {str} -- user-entered master password to authenticate
+        
+        Raises:
+            MasterPasswordIncorrect: Entered password does not match stored password
+            PasswordFileDoesNotExist: No file/db to delete
+        """
+        if os.path.isfile(filename):
+            if stored_master == entered_master:
+                # first clear the data
+                spinner = Halo(text=colored("Deleting all data...", "red"), spinner=self.dots_, color="red")
+                jfile = {}
+                with open(filename, 'w') as jsondata:
+                    json.dump(jfile, jsondata, sort_keys=True, indent=4)
+                # then delete the file
+                os.remove(filename)
+                spinner.stop()
+            else:
+                raise MasterPasswordIncorrect
         else:
             raise PasswordFileDoesNotExist
