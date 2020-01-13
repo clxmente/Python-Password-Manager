@@ -42,3 +42,8 @@ Python-Password-Manager has been completely rewritten to be more object-oriented
     * Specific options to delete ONLY passwords and another option to completely wipe all data including master password.
   * Option to copy retrieved password to clipboard
   * General code/implementation improvements
+
+# Vulnerability
+As mentioned at the top, this was made as a project and not intended for actual use. Below I demonstrate what any expert hacker can accomplish by exploiting a vulnerability. Just kidding, anyone can do this. Since the files are stored locally, they can easily be deleted without needing to enter any credentials and consequently all stored passwords are gone along with other data.
+
+<a href="https://youtu.be/Jy-c8QbzJFI" target="_blank"> <img src="./vuln.gif" width="800"> </a>
