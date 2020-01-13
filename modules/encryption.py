@@ -20,10 +20,10 @@ class DataManip:
         """Saves password to DB
         
         Arguments:
-        \tfilename {str} -- DB to save to
-        \tdata {str} -- password that will be saved
-        \tnonce {hexadecimal} -- converted from byte type to hexadecimal as byte type is not supported in JSON
-        \twebsite {str} -- name of the website for the given password
+            filename {str} -- DB to save to
+            data {str} -- password that will be saved
+            nonce {hexadecimal} -- converted from byte type to hexadecimal as byte type is not supported in JSON
+            website {str} -- name of the website for the given password
         """               
 
         spinner = Halo(text=colored("Saving", "green"), spinner=self.dots_, color="green")
@@ -51,7 +51,7 @@ class DataManip:
             with open(filename, 'w') as jsondata:
                 json.dump(jfile, jsondata, sort_keys=True, indent=4)
         spinner.stop()
-        print(colored("{} Saved successfully. Thank you!".format(self.checkmark_)))
+        print(colored(f"{self.checkmark_} Saved successfully. Thank you!", "green"))
 
 
 
@@ -59,10 +59,10 @@ class DataManip:
         """Encrypt and save the data to a file using master password as the key
         
         Arguments:
-        \tfilename {str}
-        \tdata {str} -- password to save
-        \tmaster_pass {str}
-        \twebsite {str} -- website to store password
+            filename {str}
+            data {str} -- password to save
+            master_pass {str}
+            website {str} -- website to store password
         """        
 
         """Concatenated extra characters in the case that the master password
@@ -89,16 +89,16 @@ class DataManip:
         """Return a decrypted password as a string.
         
         Arguments:
-        \tmaster_pass {str} -- key
-        \twebsite {str} -- The password being returned is from this website
-        \tfilename {str} -- database in which the password is stored.
+            master_pass {str} -- key
+            website {str} -- The password being returned is from this website
+            filename {str} -- database in which the password is stored.
         
         Raises:
-        \tPasswordNotFound: Password is not located in DB
-        \tPasswordFileDoesNotExist: The db is not initiated
+            PasswordNotFound: Password is not located in DB
+            PasswordFileDoesNotExist: The db is not initiated
         
         Returns:
-        \tstr -- decrypted password
+            str -- decrypted password
         """    
 
         if os.path.isfile(filename):
@@ -123,12 +123,12 @@ class DataManip:
         """Generates a complex password
         
         Raises:
-        \tUserExits: user types "exit" in length
-        \tEmptyField: user leaves length field empty
-        \tPasswordNotLongEnough: raised when user enters a length below 8
+            UserExits: user types "exit" in length
+            EmptyField: user leaves length field empty
+            PasswordNotLongEnough: raised when user enters a length below 8
         
         Returns:
-        \tstr -- complex password
+            str -- complex password
         """        
 
         password = []
@@ -157,14 +157,14 @@ class DataManip:
         """Loads a list of websites in DB
         
         Arguments:
-        \tfilename {str} -- DB file
+            filename {str} -- DB file
         
         Raises:
-        \tPasswordFileIsEmpty: No Passwords stored in DB
-        \tPasswordFileDoesNotExist: Password File Not found
+            PasswordFileIsEmpty: No Passwords stored in DB
+            PasswordFileDoesNotExist: Password File Not found
         
         Returns:
-        \tstr -- List of Passwords
+            str -- List of Passwords
         """
 
         if os.path.isfile(filename):
@@ -197,10 +197,10 @@ class DataManip:
         if os.path.isfile(filename):
             if stored_master == entered_master:
                 # first clear the data
-                spinner = Halo(text=colored("Deleting all data...", "red"), spinner=self.dots_, color="red")
+                spinner = Halo(text=colored("Deleting all password data...", "red"), spinner=self.dots_, color="red")
                 jfile = {}
-                with open(filename, 'w') as jsondata:
-                    json.dump(jfile, jsondata, sort_keys=True, indent=4)
+                with open(filename, 'w') as jdata:
+                    json.dump(jfile, jdata)
                 # then delete the file
                 os.remove(filename)
                 spinner.stop()
@@ -208,3 +208,68 @@ class DataManip:
                 raise MasterPasswordIncorrect
         else:
             raise PasswordFileDoesNotExist
+
+    def delete_password(self, filename, website):
+        """Deletes a single password from DB
+        
+        Arguments:
+            filename {str} -- Password file/DB
+            website {str} -- Password to delete
+        
+        Raises:
+            PasswordNotFound: No password for given website
+            PasswordFileDoesNotExist: No password file/DB
+        """
+
+        if os.path.isfile(filename):
+            with open(filename, 'r') as jdata:
+                jfile = json.load(jdata)
+            
+            try:
+                jfile.pop(website)
+                with open("db/passwords.json", 'w') as jdata:
+                    json.dump(jfile, jdata, sort_keys=True, indent=4)
+            except KeyError:
+                raise PasswordNotFound
+        else:
+            raise PasswordFileDoesNotExist
+
+    def delete_all_data(self, filename, master_file, stored_master, entered_master):
+        """Deletes ALL data including master password and passwords stored
+        
+        Arguments:
+            filename {str} -- Password db/file
+            master_file {str} -- Where masterpassword is stored
+            stored_master {str} -- The master password that is stored
+            entered_master {str} -- User-entered master password. Used to verify
+
+        Raises:
+            MasterPasswordIncorrect: Passwords do not match
+        """
+
+        if os.path.isfile(master_file) and os.path.isfile(filename): # both files exist
+            if stored_master == entered_master:
+                spinner = Halo(text=colored("Deleting all data...", "red"), spinner=self.dots_, color="red")
+                # clear data
+                jfile = {}
+                with open(master_file, 'w') as jdata:
+                    json.dump(jfile, jdata)
+                with open(filename, 'w') as jdata:
+                    json.dump(jfile, jdata)
+                # delete file
+                os.remove(filename)
+                os.remove(master_file)
+                spinner.stop()
+            else:
+                raise MasterPasswordIncorrect
+        elif os.path.isfile(master_file) and not os.path.isfile(filename): # only master password exists
+            if stored_master == entered_master:
+                spinner = Halo(text=colored("Deleting all data...", "red"), spinner=self.dots_, color="red")
+                # clear data
+                jfile = {}
+                with open(master_file, 'w') as jdata:
+                    json.dump(jfile, jdata)
+                os.remove(master_file)
+                spinner.stop()
+            else:
+                raise MasterPasswordIncorrect

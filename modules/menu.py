@@ -1,4 +1,5 @@
 import sys
+import getpass
 
 from termcolor import colored
 from halo import Halo
@@ -9,23 +10,24 @@ from modules.exceptions import *
 class Manager:
     """
     Arguments: 
-    \tobj {DataManip}
-    \tfilename {str}
-    \tmaster_pass {str}
+        obj {DataManip}
+        filename {str}
+        master_pass {str}
     """
-    def __init__(self, obj: DataManip, filename: str, master_pass: str):
+    def __init__(self, obj: DataManip, filename: str, master_file: str, master_pass: str):
         self.obj_ = obj
         self.filename_ = filename
+        self.master_file_ = master_file
         self.master_pass_ = master_pass
 
     def begin(self):
         try:
-            # TODO: test and try to break after all options finished
+            # NOTE: fully tested already
             choice = self.menu_prompt()
         except UserExits:
             raise UserExits
 
-        if choice == '3': # User Exits
+        if choice == '4': # User Exits
             raise UserExits
 
         if choice == '1': # add or update a password
@@ -51,12 +53,30 @@ class Manager:
                 print(colored(f"{self.obj_.x_mark_} DB not found. Try adding a password {self.obj_.x_mark_}", "red"))
                 return self.begin()
 
-        elif choice == '4': # Delete DB/Passwords
+        elif choice == '3': # Delete a single password
+            # NOTE: fully tested already
+            try:
+                return self.delete_password()
+            except UserExits:
+                raise UserExits
+
+        elif choice == '5': # Delete DB of Passwords
+            # NOTE: fully tested already
             try:
                 self.delete_db(self.master_pass_)
             except MasterPasswordIncorrect:
                 print(colored(f"{self.obj_.x_mark_} Master password is incorrect {self.obj_.x_mark_}", "red"))
                 return self.delete_db(self.master_pass_)
+            except UserExits:
+                raise UserExits
+        
+        elif choice == '6': # delete ALL data
+            # NOTE: fully tested already
+            try:
+                self.delete_all_data(self.master_pass_)
+            except MasterPasswordIncorrect:
+                print(colored(f"{self.obj_.x_mark_} Master password is incorrect {self.obj_.x_mark_}", "red"))
+                return self.delete_all_data(self.master_pass_)
             except UserExits:
                 raise UserExits
                 
@@ -67,17 +87,19 @@ class Manager:
         """Asks user for a choice from Menu
         
         Raises:
-        \tUserExits: User exits on choice prompt
+            UserExits: User exits on choice prompt
         
         Returns:
-        \tstr -- Users choice
+            str -- Users choice
         """
 
         print(colored("\n\t*Enter 'exit' at any point to exit.*\n", "magenta"))
         print(colored("1) Add/Update a password", "blue"))
         print(colored("2) Look up a stored password", "blue"))
-        print(colored("3) Exit program", "blue"))
-        print(colored("4) Erase all passwords", "red"))
+        print(colored("3) Delete a password", "blue"))
+        print(colored("4) Exit program", "blue"))
+        print(colored("5) Erase all passwords", "red"))
+        print(colored("6) Delete all data including Master Password", "red"))
 
         choice = input("Enter a choice: ")
 
@@ -92,13 +114,13 @@ class Manager:
         """Returns a generated password
         
         Arguments:
-        \twebsite {str} -- website for password
+            website {str} -- website for password
         
         Raises:
-        \tUserExits: User exits on loop prompt
+            UserExits: User exits on loop prompt
         
         Returns:
-        \tstr -- A randomly generated password
+            str -- A randomly generated password
         """
 
         try:
@@ -124,8 +146,15 @@ class Manager:
         """Add or update a password in the DB
         
         Raises:
-        \tUserExits: User enters exit at website prompt or generate prompt
+            UserExits: User enters exit at website prompt or generate prompt
         """
+        try:
+            self.list_passwords()
+        except PasswordFileIsEmpty:
+            pass
+        except PasswordFileDoesNotExist:
+            print(colored(f"--There are no passwords stored.--", "yellow"))
+
 
         website = input("Enter the website for which you want to store a password (ex. google.com): ")
         if website.lower() == "":
@@ -156,29 +185,19 @@ class Manager:
         website, then decrypts password for entered website
         
         Raises:
-        \tPasswordFileDoesNotExist: DB is not initialized
-        \tUserExits: User enters exit on website prompt
+            PasswordFileDoesNotExist: DB is not initialized
+            UserExits: User enters exit on website prompt
         
         Returns:
-        \tstr -- string formatted in website:password
+            str -- string formatted in website:password
         """
-
-        print(colored("Current Passwords Stored:", "yellow"))
-        spinner = Halo(text=colored("Loading Passwords", "yellow"), color="yellow", spinner=self.obj_.dots_)
-        
         try:
-            lst_of_passwords = self.obj_.list_passwords(self.filename_)
+            self.list_passwords()
         except PasswordFileIsEmpty:
-            lst_of_passwords = "--There are no passwords stored.--"
-            print(colored(lst_of_passwords, "yellow"))
             return self.begin()
-        except PasswordFileDoesNotExist:
-            print(colored(f"{self.obj_.x_mark_} DB not found. Try adding a password {self.obj_.x_mark_}", "red"))
-            return self.begin()
+            
 
-        spinner.stop()
 
-        print(colored(lst_of_passwords, "yellow"))
 
         website = input("Enter website for the password you want to retrieve: ")
 
@@ -205,15 +224,15 @@ class Manager:
         """Menu Prompt to Delete DB/Passwords
         
         Arguments:
-        \tstored_master {str} -- Used to authenticate, compared with inputted master password
+            stored_master {str} -- Used to authenticate, compared with inputted master password
         
         Raises:
-        \tPasswordFileDoesNotExist: Password file not initialized
+            PasswordFileDoesNotExist: Password file not initialized
         """
 
         confirmation = input("Are you sure you want to delete the password file? (Y/N)")
         if confirmation.lower().strip() == 'y':
-            entered_master = input("Enter your master password to delete all stored passwords: ")
+            entered_master = getpass.getpass("Enter your master password to delete all stored passwords: ")
             if entered_master.lower().strip() == "exit":
                 raise UserExits
             else:
@@ -233,3 +252,81 @@ class Manager:
             raise UserExits
         elif confirmation.strip() == "":
             return self.delete_db(stored_master)
+
+    def list_passwords(self):
+        """Lists all websites stored in DB
+        """
+
+        print(colored("Current Passwords Stored:", "yellow"))
+        spinner = Halo(text=colored("Loading Passwords", "yellow"), color="yellow", spinner=self.obj_.dots_)
+        
+        try:
+            lst_of_passwords = self.obj_.list_passwords(self.filename_)
+            spinner.stop()
+            print(colored(lst_of_passwords, "yellow"))
+        except PasswordFileIsEmpty:
+            lst_of_passwords = "--There are no passwords stored.--"
+            spinner.stop()
+            print(colored(lst_of_passwords, "yellow"))
+            raise PasswordFileIsEmpty
+        except PasswordFileDoesNotExist:
+            raise PasswordFileDoesNotExist
+
+    def delete_password(self):
+        """Deletes a single password from DB
+        
+        Raises:
+            UserExits: User exits
+        """
+        try:
+            self.list_passwords()
+        except PasswordFileIsEmpty:
+            return self.begin()
+
+        website = input("What website do you want to delete? (ex. google.com): ").strip()
+
+        if website == "exit":
+            raise UserExits
+        elif website == "":
+            return self.delete_password()
+        else:
+            try:
+                self.obj_.delete_password(self.filename_, website)
+                print(colored(f"{self.obj_.checkmark_} Data for {website} deleted successfully.", "green"))
+                return self.begin()
+            except PasswordNotFound:
+                print(colored(f"{self.obj_.x_mark_} {website} not in DB {self.obj_.x_mark_}", "red"))
+                return self.delete_password()
+            except PasswordFileDoesNotExist:
+                print(colored(f"{self.obj_.x_mark_} DB not found. Try adding a password {self.obj_.x_mark_}", "red"))
+                return self.begin()
+
+    def delete_all_data(self, stored_master):
+        """Deletes ALL data including master password and passwords stored. Asks for user confirmation.
+        
+        Arguments:
+            stored_master {str} -- Master password that is stored
+        
+        Raises:
+            UserExits: User enters exit
+            MasterPasswordIncorrect: Master Passwords do not match
+        """
+        confirmation = input("Are you sure you want to delete all data? (Y/N)")
+        if confirmation.lower().strip() == 'y':
+            entered_master = getpass.getpass("Enter your master password to delete all stored passwords: ")
+            if entered_master.lower().strip() == "exit":
+                raise UserExits
+            else:
+                try:
+                    self.obj_.delete_all_data(self.filename_, self.master_file_, stored_master, entered_master)
+                    print(colored(f"{self.obj_.checkmark_} All Data Deleted successfully. {self.obj_.checkmark_}", "green"))
+                    sys.exit()
+                except MasterPasswordIncorrect:
+                    raise MasterPasswordIncorrect
+        elif confirmation.lower().strip() == 'n':
+                print(colored("Cancelling...", "red"))
+                return self.begin()
+        elif confirmation.lower().strip() == "exit":
+            raise UserExits
+        elif confirmation.strip() == "":
+            return self.delete_all_data(stored_master)
