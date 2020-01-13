@@ -1,5 +1,6 @@
 import sys
 import getpass
+import pyperclip
 
 from termcolor import colored
 from halo import Halo
@@ -45,6 +46,18 @@ class Manager:
                 website = string.split(':')[0]
                 password = string.split(':')[1]
                 print(colored(f"Password for {website}: {password}", "yellow"))
+                
+                copy_to_clipboard = input("Copy password to clipboard? (Y/N): ").strip()
+                if copy_to_clipboard == "exit":
+                    raise UserExits
+                elif copy_to_clipboard == 'y':
+                    try:
+                        pyperclip.copy(password)
+                        print(colored(f"{self.obj_.checkmark_} Password copied to clipboard", "green"))
+                    except pyperclip.PyperclipException:
+                        print(colored(f"{self.obj_.x_mark_} If you see this message on Linux use `sudo apt-get install xsel` for copying to work. {self.obj_.x_mark_}", "red"))
+                else:
+                    pass
                 
                 return self.begin()
             except UserExits:
