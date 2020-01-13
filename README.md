@@ -23,4 +23,22 @@ The encryption method used in this program comes from the python library [PyCryp
        if sha256(master_password.encode('utf-8')).hexdigest() == stored_master_pass:
          #rest of program executes
 ```
+## Changelog
+Python-Password-Manager has been completely rewritten to be more object-oriented and abstract even more of the methods found in the original version. 
 
+#### Notable Changes:
+* Object-Oriented Design:
+  * Creation of [DataManip Class](./modules/encryption.py):
+    * Handles all backend processes regarding encryption, decryption, and DB functions.
+  * Creation of [Manager Class](./modules/menu.py):
+    * Uses DataManip methods to provide the CLI interface seen in the Demo.
+  * [Custom Exceptions](./modules/exceptions.py):
+    * Better handling of errors.
+* General Improvements:
+  * Now returns user to specific points of the program after errors where as before the entire program would restart.
+  * Echo mode is set to off when Master Password is being entered.
+  * Added two options to menu:
+    * Delete a single password
+    * Specific options to delete ONLY passwords and another option to completely wipe all data including master password.
+  * Option to copy retrieved password to clipboard
+  * General code/implementation improvements
