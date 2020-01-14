@@ -9,6 +9,8 @@ mccabe==0.6.1
 pycryptodome==3.9.4
 pylint==2.4.4
 pyperclip==1.7.0
+PyQt5==5.14.1
+PyQt5-sip==12.7.0
 six==1.13.0
 spinners==0.0.23
 termcolor==1.1.0
