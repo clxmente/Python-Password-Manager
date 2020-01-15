@@ -18,3 +18,6 @@ class PasswordFileIsEmpty(Exception):
 
 class MasterPasswordIncorrect(Exception):
     pass
+
+class InvalidCharacters(Exception):
+    pass

@@ -211,11 +211,11 @@ class DataManip:
 
     def delete_password(self, filename, website):
         """Deletes a single password from DB
-        
+
         Arguments:
             filename {str} -- Password file/DB
             website {str} -- Password to delete
-        
+
         Raises:
             PasswordNotFound: No password for given website
             PasswordFileDoesNotExist: No password file/DB
@@ -224,7 +224,7 @@ class DataManip:
         if os.path.isfile(filename):
             with open(filename, 'r') as jdata:
                 jfile = json.load(jdata)
-            
+
             try:
                 jfile.pop(website)
                 with open("db/passwords.json", 'w') as jdata:
@@ -236,7 +236,7 @@ class DataManip:
 
     def delete_all_data(self, filename, master_file, stored_master, entered_master):
         """Deletes ALL data including master password and passwords stored
-        
+
         Arguments:
             filename {str} -- Password db/file
             master_file {str} -- Where masterpassword is stored
@@ -273,3 +273,24 @@ class DataManip:
                 spinner.stop()
             else:
                 raise MasterPasswordIncorrect
+
+    def password_valid(self, password):
+        is_valid = False
+
+        invalid_chars_lst = []
+        invalid_chars = 0
+        invalid_chars += password.count(" ")
+
+        valid_chars = string.digits + string.ascii_letters + self.specialChar_
+        for i in password:
+            if i not in valid_chars:
+                invalid_chars += 1
+                invalid_chars_lst.append(i)
+
+        if password == '':
+            raise EmptyField
+        elif invalid_chars != 0:
+            return is_valid, invalid_chars_lst
+        else:
+            is_valid = True
+            return is_valid
