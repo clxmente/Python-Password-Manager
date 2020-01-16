@@ -1,5 +1,3 @@
-import sys
-
 from PyQt5 import QtCore, QtWidgets, QtGui # pylint: disable=unused-import
 from PyQt5.QtCore import QSize # pylint: disable=unused-import
 from PyQt5.QtGui import QImage, QPalette, QBrush, QPixmap, QIcon # pylint: disable=unused-import
@@ -9,15 +7,15 @@ from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QListWidget, QListWidgetIt
 from PyQt5.QtWidgets import QDialog, QFileDialog, QMessageBox, QProgressBar # pylint: disable=unused-import
 
 from modules.encryption import DataManip
-#from GUI.login_page import LoginWindow
+from GUI.login_page import LoginWindow
 
 class CreateWindow(QMainWindow):
     """Create Page shown when user has not created a master password"""
 
     def __init__(self, obj: DataManip):
-        self.obj = obj
         QMainWindow.__init__(self)
-        self.eye_path = "./icons/eye.png"
+        self.obj = obj
+        self.login_window = None
         self.lock_path = "./icons/locked.png"
         self.logo = QImage(self.lock_path)
 
@@ -29,16 +27,16 @@ class CreateWindow(QMainWindow):
         self.setStyle(QApplication.setStyle("Fusion"))
 
         # Logo
-        self.label = QLabel(self)
-        self.label.setGeometry(50, 20, 200, 200) # (x, y, w, h)
-        self.label.setStyleSheet("background-color: #77b3d4")
-        self.label.setPixmap(QPixmap.fromImage(self.logo))
-        self.label.setScaledContents(True)
+        label = QLabel(self)
+        label.setGeometry(50, 20, 200, 200) # (x, y, w, h)
+        label.setStyleSheet("background-color: #77b3d4")
+        label.setPixmap(QPixmap.fromImage(self.logo))
+        label.setScaledContents(True)
 
         # "Create your master password" text
-        self.text_label = QLabel(self)
-        self.text_label.setGeometry(25, 225, 250, 40)
-        self.text_label.setStyleSheet(
+        text_label = QLabel(self)
+        text_label.setGeometry(25, 225, 250, 40)
+        text_label.setStyleSheet(
             """
             background-color: #77b3d4;
             color: #fff;
@@ -47,7 +45,7 @@ class CreateWindow(QMainWindow):
             font-weight: light
             """
         )
-        self.text_label.setText("Create Your Master Password")
+        text_label.setText("Create Your Master Password")
 
         # First password entry
         self.password_field = QLineEdit(self)
@@ -82,10 +80,10 @@ class CreateWindow(QMainWindow):
         )
 
         # Create a profile button
-        self.create_btn = QPushButton(self)
-        self.create_btn.setText("Create Profile")
-        self.create_btn.setGeometry(25, 410, 250, 40)
-        self.create_btn.setStyleSheet(
+        create_btn = QPushButton(self)
+        create_btn.setText("Create Profile")
+        create_btn.setGeometry(25, 410, 250, 40)
+        create_btn.setStyleSheet(
             """
             background-color: #4f5d73;
             color: #fafafa;
@@ -93,7 +91,11 @@ class CreateWindow(QMainWindow):
             font-family: "Segoe UI";
             """
         )
-        self.create_btn.clicked.connect(self.validate_passwords)
+        create_btn.clicked.connect(self.validate_passwords)
+
+    def load_login_window(self):
+        self.login_window = LoginWindow(self.obj)
+        self.login_window.show()
 
     def validate_passwords(self):
         message = ""
@@ -103,6 +105,7 @@ class CreateWindow(QMainWindow):
         if password_one == password_two:
             if self.obj.password_valid(password_one)[0]:
                 self.obj.init_db(password_one)
+                self.load_login_window()
             else:
                 message = "Password Contains Invalid Characters"
                 informative_text = "Invalid Characters: "
@@ -123,9 +126,3 @@ class CreateWindow(QMainWindow):
         msg_box.setText(message)
         msg_box.setInformativeText(informative_text)
         msg_box.exec_()
-
-if __name__ == "__main__":
-    APP = QtWidgets.QApplication(sys.argv)
-    MAIN_WINDOW = CreateWindow()
-    MAIN_WINDOW.show()
-    sys.exit(APP.exec_())

@@ -14,9 +14,8 @@ class LoginWindow(QWidget):
     """Login Window Shown when DB is initialized"""
 
     def __init__(self, obj: DataManip):
-        self.obj = obj
         QWidget.__init__(self)
-        self.eye_path = "./icons/eye.png"
+        self.obj = obj
         self.lock_path = "./icons/locked.png"
         self.logo = QImage(self.lock_path)
 
@@ -25,19 +24,18 @@ class LoginWindow(QWidget):
         self.setWindowTitle("SeveralPasswords")
         self.setWindowIcon(QIcon(self.lock_path))
         self.setStyleSheet("background-color: #77b3d4")
-        self.setStyle(QApplication.setStyle("Fusion"))
 
         # Logo
-        self.label = QLabel(self)
-        self.label.setGeometry(50, 20, 200, 200) # (x, y, w, h)
-        self.label.setStyleSheet("background-color: #77b3d4") #77b3d4
-        self.label.setPixmap(QPixmap.fromImage(self.logo))
-        self.label.setScaledContents(True)
+        label = QLabel(self)
+        label.setGeometry(50, 20, 200, 200) # (x, y, w, h)
+        label.setStyleSheet("background-color: #77b3d4") #77b3d4
+        label.setPixmap(QPixmap.fromImage(self.logo))
+        label.setScaledContents(True)
 
         # "Please Log In" text
-        self.text_label = QLabel(self)
-        self.text_label.setGeometry(92, 220, 115, 40) #77b3d4
-        self.text_label.setStyleSheet(
+        text_label = QLabel(self)
+        text_label.setGeometry(92, 220, 115, 40) #77b3d4
+        text_label.setStyleSheet(
             """
             background-color: #77b3d4;
             color: #fff;
@@ -46,7 +44,7 @@ class LoginWindow(QWidget):
             font-weight: light
             """
         )
-        self.text_label.setText("Please Log In")
+        text_label.setText("Please Log In")
 
         # Password Entry
         self.password_field = QLineEdit(self)
@@ -65,10 +63,10 @@ class LoginWindow(QWidget):
         )
 
         # Log In button
-        self.log_in_btn = QPushButton(self)
-        self.log_in_btn.setText("Log In")
-        self.log_in_btn.setGeometry(25, 335, 250, 40)
-        self.log_in_btn.setStyleSheet(
+        log_in_btn = QPushButton(self)
+        log_in_btn.setText("Log In")
+        log_in_btn.setGeometry(25, 335, 250, 40)
+        log_in_btn.setStyleSheet(
             """
             background-color: #4f5d73;
             color: #fafafa;
@@ -76,7 +74,7 @@ class LoginWindow(QWidget):
             font-family: "Segoe UI";
             """
         )
-        self.log_in_btn.clicked.connect(self.verify_password)
+        log_in_btn.clicked.connect(self.verify_password)
 
     def show_error_box(self, message, informative_text="Try Again!"):
         msg_box = QMessageBox()
