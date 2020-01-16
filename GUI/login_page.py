@@ -9,20 +9,19 @@ from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QListWidget, QListWidgetIt
 from PyQt5.QtWidgets import QDialog, QFileDialog, QMessageBox, QProgressBar # pylint: disable=unused-import
 
 from modules.encryption import DataManip
-#from GUI.login_page import LoginWindow
 
-class CreateWindow(QMainWindow):
-    """Create Page shown when user has not created a master password"""
+class LoginWindow(QWidget):
+    """Login Window Shown when DB is initialized"""
 
     def __init__(self, obj: DataManip):
         self.obj = obj
-        QMainWindow.__init__(self)
+        QWidget.__init__(self)
         self.eye_path = "./icons/eye.png"
         self.lock_path = "./icons/locked.png"
         self.logo = QImage(self.lock_path)
 
         # General Window Setup
-        self.setFixedSize(QSize(300, 500))
+        self.setFixedSize(QSize(300, 425))
         self.setWindowTitle("SeveralPasswords")
         self.setWindowIcon(QIcon(self.lock_path))
         self.setStyleSheet("background-color: #77b3d4")
@@ -31,13 +30,13 @@ class CreateWindow(QMainWindow):
         # Logo
         self.label = QLabel(self)
         self.label.setGeometry(50, 20, 200, 200) # (x, y, w, h)
-        self.label.setStyleSheet("background-color: #77b3d4")
+        self.label.setStyleSheet("background-color: #77b3d4") #77b3d4
         self.label.setPixmap(QPixmap.fromImage(self.logo))
         self.label.setScaledContents(True)
 
-        # "Create your master password" text
+        # "Please Log In" text
         self.text_label = QLabel(self)
-        self.text_label.setGeometry(25, 225, 250, 40)
+        self.text_label.setGeometry(92, 220, 115, 40) #77b3d4
         self.text_label.setStyleSheet(
             """
             background-color: #77b3d4;
@@ -47,13 +46,13 @@ class CreateWindow(QMainWindow):
             font-weight: light
             """
         )
-        self.text_label.setText("Create Your Master Password")
+        self.text_label.setText("Please Log In")
 
-        # First password entry
+        # Password Entry
         self.password_field = QLineEdit(self)
         self.password_field.setPlaceholderText("Enter Your Password")
         self.password_field.setEchoMode(QLineEdit.Password)
-        self.password_field.setGeometry(25, 290, 250, 40)
+        self.password_field.setGeometry(25, 275, 250, 40)
         self.password_field.setStyleSheet(
             """
             background-color: #fff;
@@ -65,27 +64,11 @@ class CreateWindow(QMainWindow):
             """
         )
 
-        # Second password entry
-        self.cnfrm_password = QLineEdit(self)
-        self.cnfrm_password.setPlaceholderText("Confirm Your Password")
-        self.cnfrm_password.setEchoMode(QLineEdit.Password)
-        self.cnfrm_password.setGeometry(25, 350, 250, 40)
-        self.cnfrm_password.setStyleSheet(
-            """
-            background-color: #fff;
-            color: #000;
-            border: 0px;
-            font-family: "Segoe UI";
-            padding-left: 10px;
-            border-radius: 5px
-            """
-        )
-
-        # Create a profile button
-        self.create_btn = QPushButton(self)
-        self.create_btn.setText("Create Profile")
-        self.create_btn.setGeometry(25, 410, 250, 40)
-        self.create_btn.setStyleSheet(
+        # Log In button
+        self.log_in_btn = QPushButton(self)
+        self.log_in_btn.setText("Log In")
+        self.log_in_btn.setGeometry(25, 335, 250, 40)
+        self.log_in_btn.setStyleSheet(
             """
             background-color: #4f5d73;
             color: #fafafa;
@@ -93,27 +76,7 @@ class CreateWindow(QMainWindow):
             font-family: "Segoe UI";
             """
         )
-        self.create_btn.clicked.connect(self.validate_passwords)
-
-    def validate_passwords(self):
-        message = ""
-        password_one = self.password_field.text()
-        password_two = self.cnfrm_password.text()
-
-        if password_one == password_two:
-            if self.obj.password_valid(password_one)[0]:
-                self.obj.init_db(password_one)
-            else:
-                message = "Password Contains Invalid Characters"
-                informative_text = "Invalid Characters: "
-                for i in self.obj.password_valid(password_one)[1]:
-                    informative_text += f"{i} "
-                print(message)
-                self.show_error_box(message, informative_text)
-        else:
-            message = "Passwords Do Not Match"
-            print(message)
-            self.show_error_box(message)
+        self.log_in_btn.clicked.connect(self.verify_password)
 
     def show_error_box(self, message, informative_text="Try Again!"):
         msg_box = QMessageBox()
@@ -124,8 +87,17 @@ class CreateWindow(QMainWindow):
         msg_box.setInformativeText(informative_text)
         msg_box.exec_()
 
+    def verify_password(self):
+        """Grants Log in if password is correct"""
+
+        access = self.obj.authenticate(self.password_field.text())
+        if access: # Log in correct
+            self.show_error_box("CORRECT")
+        else:
+            self.show_error_box("Incorrect Password")
+
 if __name__ == "__main__":
     APP = QtWidgets.QApplication(sys.argv)
-    MAIN_WINDOW = CreateWindow()
+    MAIN_WINDOW = LoginWindow()
     MAIN_WINDOW.show()
     sys.exit(APP.exec_())

@@ -3,6 +3,7 @@ import string
 import os
 import random
 
+from hashlib import sha256
 from Crypto.Cipher import AES
 from halo import Halo
 from termcolor import colored
@@ -18,13 +19,13 @@ class DataManip:
 
     def __save_password(self, filename, data, nonce, website):
         """Saves password to DB
-        
+
         Arguments:
             filename {str} -- DB to save to
             data {str} -- password that will be saved
             nonce {hexadecimal} -- converted from byte type to hexadecimal as byte type is not supported in JSON
             website {str} -- name of the website for the given password
-        """               
+        """
 
         spinner = Halo(text=colored("Saving", "green"), spinner=self.dots_, color="green")
         spinner.start()
@@ -57,13 +58,13 @@ class DataManip:
 
     def encrypt_data(self, filename, data, master_pass, website):
         """Encrypt and save the data to a file using master password as the key
-        
+
         Arguments:
             filename {str}
             data {str} -- password to save
             master_pass {str}
             website {str} -- website to store password
-        """        
+        """
 
         """Concatenated extra characters in the case that the master password
         is less than 16 characters. However, this isn't a big safety trade off
@@ -87,19 +88,19 @@ class DataManip:
 
     def decrypt_data(self, master_pass, website, filename):
         """Return a decrypted password as a string.
-        
+
         Arguments:
             master_pass {str} -- key
             website {str} -- The password being returned is from this website
             filename {str} -- database in which the password is stored.
-        
+
         Raises:
             PasswordNotFound: Password is not located in DB
             PasswordFileDoesNotExist: The db is not initiated
-        
+
         Returns:
             str -- decrypted password
-        """    
+        """
 
         if os.path.isfile(filename):
             try:
@@ -114,22 +115,22 @@ class DataManip:
         # add extra characters and take first 16 to make sure key is right.
         formatted_master_pass = master_pass + "================"
         master_pass_encoded = formatted_master_pass[:16].encode("utf-8")
-        cipher = AES.new(master_pass_encoded, AES.MODE_EAX, nonce = nonce)
+        cipher = AES.new(master_pass_encoded, AES.MODE_EAX, nonce=nonce)
         plaintext_password = cipher.decrypt(password).decode("utf-8")
 
         return plaintext_password
 
     def generate_password(self):
         """Generates a complex password
-        
+
         Raises:
             UserExits: user types "exit" in length
             EmptyField: user leaves length field empty
             PasswordNotLongEnough: raised when user enters a length below 8
-        
+
         Returns:
             str -- complex password
-        """        
+        """
 
         password = []
         length = input("Enter Length for Password (At least 8): ")
@@ -148,21 +149,21 @@ class DataManip:
                 #choose character from one of the lists randomly
                 password.append(random.choice(random.choice([string.ascii_lowercase, string.ascii_uppercase, string.digits, self.specialChar_])))
 
-            finalPass = "".join(password)
+            final_pass = "".join(password)
             spinner.stop()
 
-            return finalPass
-    
+            return final_pass
+
     def list_passwords(self, filename):
         """Loads a list of websites in DB
-        
+
         Arguments:
             filename {str} -- DB file
-        
+
         Raises:
             PasswordFileIsEmpty: No Passwords stored in DB
             PasswordFileDoesNotExist: Password File Not found
-        
+
         Returns:
             str -- List of Passwords
         """
@@ -170,11 +171,11 @@ class DataManip:
         if os.path.isfile(filename):
             with open(filename, 'r') as jsondata:
                 pass_list = json.load(jsondata)
-            
+
             passwords_lst = ""
             for i in pass_list:
                 passwords_lst += "--{}\n".format(i)
-            
+
             if passwords_lst == "":
                 raise PasswordFileIsEmpty
             else:
@@ -184,12 +185,12 @@ class DataManip:
 
     def delete_db(self, filename, stored_master, entered_master):
         """Delete DB/Password file & contents
-        
+
         Arguments:
             filename {str} -- DB/File to delete
             stored_master {str} -- Stored master password in DB
             entered_master {str} -- user-entered master password to authenticate
-        
+
         Raises:
             MasterPasswordIncorrect: Entered password does not match stored password
             PasswordFileDoesNotExist: No file/db to delete
@@ -275,6 +276,16 @@ class DataManip:
                 raise MasterPasswordIncorrect
 
     def password_valid(self, password):
+        """Checks if password is valid
+
+        Arguments:
+            password {str} -- Password to check
+
+        Returns:
+            bool -- is_valid T/F
+            list -- list of invalid characters
+        """
+
         is_valid = False
 
         invalid_chars_lst = []
@@ -288,9 +299,48 @@ class DataManip:
                 invalid_chars_lst.append(i)
 
         if password == '':
-            raise EmptyField
+            invalid_chars_lst.append("Empty Field")
+            return is_valid, invalid_chars_lst
         elif invalid_chars != 0:
             return is_valid, invalid_chars_lst
         else:
             is_valid = True
-            return is_valid
+            return is_valid, invalid_chars_lst
+
+    def init_db(self, master_password):
+        """Initializes file storing master password
+
+        Arguments:
+            master_password {str} -- master password to encrypt
+        """
+
+        try:
+            os.mkdir("db/")
+        except FileExistsError:
+            pass
+
+        hash_master = sha256(master_password.encode("utf-8")).hexdigest()
+        jfile = {"Master": {}}
+        jfile["Master"] = hash_master
+        with open("db/masterpassword.json", 'w') as jsondata:
+            json.dump(jfile, jsondata, sort_keys=True, indent=4)
+
+    def authenticate(self, password):
+        """Returns True if password argument is the same as stored master password
+        
+        Arguments:
+            password {str} -- user-entered password
+        
+        Returns:
+            bool -- True if password is correct. False if not.
+        """
+
+        access = False
+        with open("db/masterpassword.json", 'r') as jsondata:
+            jfile = json.load(jsondata)
+
+        stored_master_pass = jfile["Master"]
+        if sha256(password.encode("utf-8")).hexdigest() == stored_master_pass:
+            access = True
+
+        return access
