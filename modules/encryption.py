@@ -327,10 +327,10 @@ class DataManip:
 
     def authenticate(self, password):
         """Returns True if password argument is the same as stored master password
-        
+
         Arguments:
             password {str} -- user-entered password
-        
+
         Returns:
             bool -- True if password is correct. False if not.
         """
@@ -344,3 +344,32 @@ class DataManip:
             access = True
 
         return access
+
+    def get_passwords_list(self, filename):
+        """Makes a list of passwords in DB
+
+        Arguments:
+            filename {str} -- DB file
+
+        Raises:
+            PasswordFileIsEmpty: No Passwords stored in DB
+            PasswordFileDoesNotExist: Password File Not found
+
+        Returns:
+            list -- List of Passwords
+        """
+
+        if os.path.isfile(filename):
+            with open(filename, 'r') as jsondata:
+                pass_list = json.load(jsondata)
+
+            passwords_lst = []
+            for i in pass_list:
+                passwords_lst.append(i)
+
+            if passwords_lst == []:
+                raise PasswordFileIsEmpty
+            else:
+                return passwords_lst
+        else:
+            raise PasswordFileDoesNotExist
