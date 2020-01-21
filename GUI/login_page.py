@@ -1,12 +1,7 @@
-import sys
-
-from PyQt5 import QtCore, QtWidgets, QtGui # pylint: disable=unused-import
-from PyQt5.QtCore import QSize # pylint: disable=unused-import
-from PyQt5.QtGui import QImage, QPalette, QBrush, QPixmap, QIcon # pylint: disable=unused-import
-from PyQt5.QtWidgets import QPushButton, QLineEdit, QTextEdit, QTabWidget, QErrorMessage # pylint: disable=unused-import
-from PyQt5.QtWidgets import QMainWindow, QLabel, QGridLayout, QWidget, QApplication # pylint: disable=unused-import
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QListWidget, QListWidgetItem # pylint: disable=unused-import
-from PyQt5.QtWidgets import QDialog, QFileDialog, QMessageBox, QProgressBar # pylint: disable=unused-import
+from PyQt5.QtCore import QSize
+from PyQt5.QtGui import QImage, QPixmap, QIcon
+from PyQt5.QtWidgets import QPushButton, QLineEdit, QMessageBox
+from PyQt5.QtWidgets import QLabel, QWidget
 
 from modules.encryption import DataManip
 
@@ -93,9 +88,3 @@ class LoginWindow(QWidget):
             self.show_error_box("CORRECT")
         else:
             self.show_error_box("Incorrect Password")
-
-if __name__ == "__main__":
-    APP = QtWidgets.QApplication(sys.argv)
-    MAIN_WINDOW = LoginWindow()
-    MAIN_WINDOW.show()
-    sys.exit(APP.exec_())

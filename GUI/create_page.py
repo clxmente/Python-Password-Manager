@@ -1,10 +1,7 @@
-from PyQt5 import QtCore, QtWidgets, QtGui # pylint: disable=unused-import
-from PyQt5.QtCore import QSize # pylint: disable=unused-import
-from PyQt5.QtGui import QImage, QPalette, QBrush, QPixmap, QIcon # pylint: disable=unused-import
-from PyQt5.QtWidgets import QPushButton, QLineEdit, QTextEdit, QTabWidget, QErrorMessage # pylint: disable=unused-import
-from PyQt5.QtWidgets import QMainWindow, QLabel, QGridLayout, QWidget, QApplication # pylint: disable=unused-import
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QListWidget, QListWidgetItem # pylint: disable=unused-import
-from PyQt5.QtWidgets import QDialog, QFileDialog, QMessageBox, QProgressBar # pylint: disable=unused-import
+from PyQt5.QtCore import QSize
+from PyQt5.QtGui import QImage, QPixmap, QIcon
+from PyQt5.QtWidgets import QPushButton, QLineEdit, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QLabel, QApplication
 
 from modules.encryption import DataManip
 from GUI.login_page import LoginWindow
